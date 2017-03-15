@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>dormie</title>
+	<!--smart phone-->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<!--font-->
+	<link href='http://fonts.googleapis.com/css?family=Noto+Serif:400,700' rel='stylesheet' type='text/css'>
+	<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,600,700' rel='stylesheet' type='text/css'>
+
+	<!--jquery-->
+	<script src="http://code.jquery.com/jquery-latest.js" type="text/javascript"></script>
+	<script src="http://code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+	<!--js-->
+	<script>
+		$(document).ready(function() {
+			$('.grid').click(function() {
+				var parent = $(this).closest('.playergrid');
+				$('#' + parent.attr('id') + ' .grid').each(function() {
+					$(this).css('background-color', '#fff');
+				});
+				$(this).css('background-color', 'yellow');
+				var val = $(this).text();
+				if (val == '+') {
+					alert("Prompt for alternate score");
+				} else {
+					var id = parseInt(parent.attr('id').match(/_(\d+)/)[1], 10);
+					$('#gross' + id).text(val);
+					$('#grossV' + id).text(val);
+					var net = parseInt(val) - parseInt($('#hcp' + id).val());
+					$('#net' + id).text(net);
+					$('#netV' + id).text(net);
+					
+				}
+				
+			});
+
+			$('.propit').click(function() {
+				$(this).toggleClass('propActive');
+				var id = parseInt($(this).attr('id').match(/_(\d+)/)[1], 10);
+			});
+			$('.prop').click(function() {
+				var id = parseInt($(this).attr('id').match(/_(\d+)/)[1], 10);
+				$('#propgrid_' + id).toggle('slide', {direction: 'left'});
+			});
+			
+			$('.nexthole').click(function() {				
+				var tsum1 = 0;
+				var tsum2 = 0;
+				var tp1 = parseInt($('#net1').text());
+				var tp2 = parseInt($('#net2').text());
+				var tp3 = parseInt($('#net3').text());
+				var tp4 = parseInt($('#net4').text());
+				
+				var l1, h1, l2, h2;
+				if (tp1 < tp2) {
+					l1 = tp1;
+					h1 = tp2;
+				} else {
+					l1 = tp2;
+					h1 = tp1;
+				}
+				if (tp3 < tp4) {
+					l2 = tp3;
+					h2 = tp4;
+				} else {
+					l2 = tp4;
+					h2 = tp3;
+				}
+				if (l1 == l2) {
+					tsum1 = .5;
+					tsum2 = .5;
+				}
+				if (h1 == h2) {
+					tsum1 = tsum1 + .5;
+					tsum2 = tsum2 + .5;
+				}
+				
+				tsum1 = tsum1 + (1 * (l1 < l2)) + (1 * (h1 < h2));
+				tsum2 = tsum2 + (1 * (l2 < l1)) + (1 * (h2 < h1));
+	
+				var s = 's';
+				if (tsum1 == 1) {s = '';} 
+				$('#win1').text(tsum1.toFixed(1) + ' point' + s);
+				s = 's';
+				if (tsum2 == 1) {s = '';}
+				$('#win2').text(tsum2.toFixed(1) + ' point' + s);
+
+				var id, name, go;
+				$('.playerprop').each(function() {
+					id = parseInt($(this).attr('id').match(/_(\d+)/)[1], 10);
+					name = $('#name_' + id).text() + ' -';
+					go = 0;
+					$('#' + $(this).attr('id') + ' .propit').each(function() {
+						if($(this).hasClass('propActive')) {
+							name = ' ' + name + $(this).text() + ',';
+							go = 1;
+						}
+					});
+					if (go) {
+						$('#verifyProp').append(name + '<br />');
+					}
+				});
+
+				$('#vhole').text($('#hole').text());
+
+				$('#main').toggle('slide', {direction: 'up'});
+				$('#verifyModal').toggle('slide', {direction: 'down'});
+
+			});
+			
+			$('#cancel').click(function() {
+				$('#main').toggle('slide', {direction: 'up'});
+				$('#verifyModal').toggle('slide', {direction: 'down'});
+			});
+			
+			$('.savehole').click(function() {
+				$('#thru').text($('#hole').text());
+				$('#hole').text(parseInt($('#hole').text()) + 1);
+				var w1 = $('#win1').text().substring(0,3);
+				var w2 = $('#win2').text().substring(0,3);
+				
+				var t1 = $('#total1').text();
+				var t2 = $('#total2').text();
+
+				$('#total1').text(parseFloat(t1) + parseFloat(w1));
+				$('#total2').text(parseFloat(t2) + parseFloat(w2));
+			
+				$('#main').toggle('slide', {direction: 'left'});
+				$('#verifyModal').toggle('slide', {direction: 'right'});
+
+			});
+		});
+	</script>
+
+	<!--styles-->
+	<style>
+		body {
+			margin: 0px;
+			padding: 0px;
+			font-family: 'Open Sans', arial;
+		}
+		#navbar {
+			position: fixed;
+			top: 0px;
+			width: 100%;
+			margin: 0px;
+			padding: 4px;
+			background-color: #434f30;
+			color: #fff;
+			height: 30px;
+			z-index: 99;
+			vertical-align: middle;
+		}
+		#backbar {
+			position: relative;
+			height: 40px;
+		}
+		.container {
+			position: relative;
+			width: calc(100% - 10px);
+			padding: 5px;
+			margin: 5px;
+		}
+		
+		.currentTeam {
+			display: inline-block;
+			width: 30%;
+			text-align: center;
+			vertical-align: top;
+		}
+		.currentVS {
+			display: inline-block;
+			width: 20px;
+			text-align: center;
+			vertical-align: top;
+		}
+		.font12 {
+			font-size: 12px;
+		}
+		.font10 {
+			font-size: 12px;
+			font-weight: 400;
+		}
+		#currentHole {
+			border-top: 1px solid #727272;
+			border-bottom: 1px solid #727272;
+			background-color: #ccc;
+			font-weight: 700;
+			padding: 3px;
+			margin: 6px;
+		}
+		
+		.propActive {
+			background-color: red;
+		}
+		
+		.player {
+			padding: 5px;
+			border-bottom: 1px solid #727272;
+		}
+		.playerName {
+			font-size: 18px;
+			font-weight: 700;
+			float: left;
+			width: 140px;
+		}
+		
+		.grid {
+			position: relative;
+			float: left;
+			text-align: center;
+			vertical-align: center;
+			width: 35px;
+			height: 35px;
+			border: 1px solid #727272;
+			margin: 3px;
+			float: left;
+		}
+		.playergrid, playerprop {
+			float: right;
+			width: 180px;
+		}
+		
+		.playerscore {
+			float: left;
+			width: 35px;
+		}
+		
+		.propit {
+			position: relative;
+			float: left;
+			text-align: center;
+			vertical-align: center;
+			width: 80px;
+			height: 40px;
+			border: 1px solid #727272;
+			margin: 3px;
+			float: left;
+		}
+		.clearer {
+			clear: both;
+		}
+		
+		.hider {
+			display: none;
+		}
+		
+		#nexthole {
+			border-radius: 0px;
+			float: right;
+		}
+		
+		.net {
+			font-size: 18px;
+			font-weight: 700;
+		}
+		
+		#verifyModal {
+			position: absolute;
+			width: 95%;
+			height: 95%;
+			backround-color: red;
+			z-index: 999;
+		}
+		
+		.team {
+			position: relative;
+			width: calc(40% - 10px);
+			padding: 5px;
+			margin: 5px;
+			float: left;
+		}
+		
+	</style>
+</head>
+<body>
+	<div id="navbar">
+		dormie
+	</div>
+	<div id="backbar"></div>
+	
+	<div id="verifyModal" class="container hider">
+		<div id="currentHole">HOLE <span id="vhole">5</span> | Par 4
+			<button class="savehole">SAVE</button>
+			<div class="clearer"></div>
+		</div>
+		<div class="team">
+			<img src="putts.jpg" width=100 height=100 /><br />
+			Jimmy <span id="grossV1"></span>/ <span class="net" id="netV1"></span><br />
+			Dave <span id="grossV2"></span>/ <span class="net" id="netV2"></span><br /><br />
+			<div id="win1"></div>
+		</div>
+		<div class="team">
+			<img src="wood.JPG" width=100 height=100 /><br />
+			Kevin <span id="grossV3"></span>/ <span class="net" id="netV3"></span><br />
+			David <span id="grossV4"></span>/ <span class="net" id="netV4"></span><br /><br />
+			<div id="win2"></div>
+		</div>
+		<div class="clearer"></div>
+		<div id="verifyProp"></div>
+		<br />
+		<button class="savehole">SAVE</button>
+		<br />
+		<div id="cancel">cancel</div>
+	</div>
+	
+	
+	<div id="main" class="container">
+		<div id="currentInfo">
+			<div id="currentMatch">
+				<div class="currentTeam"><strong>Jimmy/Dave<br /><span id="total1">0</span> points</strong></div><div class="currentVS">vs</div><div class="currentTeam">Kevin/David<br /><span id="total2">0</span> points</div>
+				<div class="currentTeam font12">thru <span id="thru">0</span> holes</div>
+			</div>
+		</div>
+
+		<div id="currentHole">HOLE <span id="hole">1</span> | Par 4
+			<button type="button" class="nexthole">NEXT</button>
+			<div class="clearer"></div>
+		</div>
+
+		<div class="player">
+			<div class="playerName"><span id="name_1">Jimmy</span>
+				<div class="font10">0 strokes</div><input type="hidden" value="0" id="hcp1" />
+				<button class="prop" id="prop_1">PROP</button>
+				<div id="propspace_1"></div>
+			</div>
+			<div class="playerscore"><span id="gross1"></span>/ <span class="net" id="net1"></span></div>
+			<div class="playergrid" id="playergrid_1">
+				<div class="grid">2</div>
+				<div class="grid">3</div>
+				<div class="grid">4</div>
+				<div class="grid">5</div>
+				<div class="grid">6</div>
+				<div class="grid">7</div>
+				<div class="grid">8</div>
+				<div class="grid">+</div>
+				<div class="clearer"></div>
+			</div>
+			<div class="clearer"></div>
+
+			<div class="playerprop hider" id="propgrid_1">
+				<div class="propit">MULLIGAN</div>
+				<div class="propit">HOUSE</div>
+				<div class="propit">PUKE</div>
+				<div class="propit">3 PUTT</div>
+				<div class="clearer"></div>
+			</div>
+
+
+
+		</div>
+
+		<div class="player">
+			<div class="playerName"><span id="name_2">Dave</span>
+				<div class="font10">1 stroke</div><input type="hidden" value="1" id="hcp2" />
+				<button class="prop" id="prop_2">PROP</button>
+			</div>
+			<div class="playerscore"><span id="gross2"></span>/ <span class="net" id="net2"></span></div>
+
+			<div class="playergrid" id="playergrid_2">
+				<div class="grid">2</div>
+				<div class="grid">3</div>
+				<div class="grid">4</div>
+				<div class="grid">5</div>
+				<div class="grid">6</div>
+				<div class="grid">7</div>
+				<div class="grid">8</div>
+				<div class="grid">+</div>
+				<div class="clearer"></div>
+			</div>
+			<div class="clearer"></div>
+
+			<div class="playerprop hider" id="propgrid_2">
+				<div class="propit">MULLIGAN</div>
+				<div class="propit">HOUSE</div>
+				<div class="propit">PUKE</div>
+				<div class="propit">3 PUTT</div>
+				<div class="clearer"></div>
+			</div>
+		</div>
+		
+		<div class="player">
+			<div class="playerName"><span id="name_3">Kevin</span>
+				<div class="font10">1 stroke</div><input type="hidden" value="1" id="hcp3" />
+				<button class="prop" id="prop_3">PROP</button>
+			</div>
+			<div class="playerscore"><span id="gross3"></span>/ <span class="net" id="net3"></span></div>
+			<div class="playergrid" id="playergrid_3">
+				<div class="grid">2</div>
+				<div class="grid">3</div>
+				<div class="grid">4</div>
+				<div class="grid">5</div>
+				<div class="grid">6</div>
+				<div class="grid">7</div>
+				<div class="grid">8</div>
+				<div class="grid">+</div>
+				<div class="clearer"></div>
+			</div>
+			<div class="clearer"></div>
+			<div class="playerprop hider" id="propgrid_3">
+				<div class="propit">MULLIGAN</div>
+				<div class="propit">HOUSE</div>
+				<div class="propit">PUKE</div>
+				<div class="propit">3 PUTT</div>
+				<div class="clearer"></div>
+			</div>
+		</div>
+
+		<div class="player">
+			<div class="playerName"><span id="name_4">David</span>
+				<div class="font10">2 strokes</div><input type="hidden" value="2" id="hcp4" />
+				<button class="prop" id="prop_4">PROP</button>
+			</div>
+			<div class="playerscore"><span id="gross4"></span>/ <span class="net" id="net4"></span></div>
+
+			<div class="playergrid" id="playergrid_4">
+				<div class="grid">2</div>
+				<div class="grid">3</div>
+				<div class="grid">4</div>
+				<div class="grid">5</div>
+				<div class="grid">6</div>
+				<div class="grid">7</div>
+				<div class="grid">8</div>
+				<div class="grid">+</div>
+				<div class="clearer"></div>
+			</div>
+			<div class="clearer"></div>
+			<div class="playerprop hider" id="propgrid_4">
+				<div class="propit">MULLIGAN</div>
+				<div class="propit">HOUSE</div>
+				<div class="propit">PUKE</div>
+				<div class="propit">3 PUTT</div>
+				<div class="clearer"></div>
+			</div>
+		</div>
+			<button type="button" class="nexthole">NEXT</button>
+	</div>
+</body>
+</html>
